@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Arcade Lobby</title>
+    <style>
+        body {
+            background-color: #0f111a;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            margin: 40px 0;
+        }
+        h1 {
+            color: #ff3e6c;
+            font-size: 3rem;
+            text-shadow: 0 0 10px rgba(255, 62, 108, 0.5);
+        }
+        .balance-card {
+            background: #1a1d29;
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 12px;
+            border: 1px solid #2a2e3f;
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+        }
+        .balance-amount {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        .grid {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #1a1d29;
+            border: 1px solid #2a2e3f;
+            border-radius: 16px;
+            width: 260px;
+            padding: 20px;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #ff3e6c;
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #00e5ff;
+        }
+        .card p {
+            color: #8a8f98;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🎰 GITHUB ARCADE 🎰</h1>
+        <p>A completely free, static HTML demo site</p>
+    </div>
+
+    <div class="balance-card">
+        Wallet Balance: <span class="balance-amount" id="balance">$0.00</span>
+    </div>
+
+    <div class="grid">
+        <a href="./plinko/index.html" class="card">
+            <h2>🔵 Plinko</h2>
+            <p>Drop the ball down the peg grid and hit high multipliers!</p>
+        </a>
+        <a href="./dice/index.html" class="card">
+            <h2>🎲 Dice</h2>
+            <p>Predict whether the roll will be over or under your target.</p>
+        </a>
+    </div>
+
+    <script>
+        // Initialize balance if it doesn't exist
+        if (!localStorage.getItem('arcade_balance')) {
+            localStorage.setItem('arcade_balance', '1000.00');
+        }
+        
+        // Display balance
+        const currentBalance = parseFloat(localStorage.getItem('arcade_balance')).toFixed(2);
+        document.getElementById('balance').innerText = `$${currentBalance}`;
+    </script>
+</body>
+</html>
