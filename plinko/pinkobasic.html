@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Plinko - Arcade</title>
+    <style>
+        body {
+            background-color: #0f111a;
+            color: white;
+            font-family: sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .nav { margin-bottom: 20px; }
+        a { color: #00e5ff; text-decoration: none; }
+        canvas {
+            background: #141622;
+            border-radius: 8px;
+            border: 1px solid #2a2e3f;
+        }
+        .controls { margin-top: 20px; }
+        button {
+            background: #ff3e6c;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #e0325c; }
+        input {
+            background: #1a1d29;
+            border: 1px solid #2a2e3f;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            width: 80px;
+            font-size: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav"><a href="../index.html">← Back to Lobby</a></div>
+    <h2>🔵 Static Plinko</h2>
+    <p>Balance: <span id="balance" style="color:#4caf50; font-weight:bold;">$0.00</span></p>
+
+    <canvas id="plinkoCanvas" width="500" height="500"></canvas>
+
+    <div class="controls">
+        <label>Bet Amount: $</label>
+        <input type="number" id="betAmount" value="10" min="1">
+        <button onclick="dropBall()">Drop Ball</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('plinkoCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let balance = parseFloat(localStorage.getItem('arcade_balance')) || 1000;
+        updateBalanceDisplay();
+
+        const rows = 8;
+        const pegs = [];
+        const balls = [];
+        const multipliers = [5, 2, 0.5, 0.2, 0.2, 0.5, 2, 5];
+
+        // Generate Pegs
+        for (let i = 2; i <= rows; i++) {
+            const count = i + 1;
+            const y = i * 45;
+            for (let j = 0; j < count; j++) {
+                const x = (canvas.width / 2) - ((count - 1) * 18) + (j * 36);
+                pegs.push({ x, y });
+            }
+        }
+
+        function updateBalanceDisplay() {
+            document.getElementById('balance').innerText = `$${balance.toFixed(2)}`;
+            localStorage.setItem('arcade_balance', balance.toString());
+        }
+
+        function dropBall() {
+            const bet = parseFloat(document.getElementById('betAmount').value);
+            if (bet > balance || bet <= 0) return alert("Invalid or insufficient funds!");
+
+            balance -= bet;
+            updateBalanceDisplay();
+
+            balls.push({
+                x: canvas.width / 2 + (Math.random() * 4 - 2),
+                y: 40,
+                vx: 0,
+                vy: 2,
+                radius: 6,
+                bet: bet
+            });
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Pegs
+            ctx.fillStyle = '#ffffff';
+            pegs.forEach(peg => {
+                ctx.beginPath();
+                ctx.arc(peg.x, peg.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw Multiplier Buckets
+            const bucketWidth = canvas.width / multipliers.length;
+            for (let i = 0; i < multipliers.length; i++) {
+                ctx.fillStyle = multipliers[i] >= 1 ? '#ff3e6c' : '#2a2e3f';
+                ctx.fillRect(i * bucketWidth + 2, canvas.height - 35, bucketWidth - 4, 30);
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(multipliers[i] + 'x', i * bucketWidth + bucketWidth / 2, canvas.height - 15);
+            }
+
+            // Update & Draw Balls
+            for (let i = balls.length - 1; i >= 0; i--) {
+                let b = balls[i];
+                b.vy += 0.15; // Gravity
+                b.x += b.vx;
+                b.y += b.vy;
+
+                // Peg Collision Check
+                pegs.forEach(peg => {
+                    let dist = Math.hypot(b.x - peg.x, b.y - peg.y);
+                    if (dist < b.radius + 3) {
+                        // Push out and bounce off randomly sideways
+                        b.y = peg.y - b.radius; 
+                        b.vy = -b.vy * 0.4;
+                        b.vx = (b.x - peg.x) * 0.8 + (Math.random() * 0.4 - 0.2);
+                    }
+                });
+
+                // Draw Ball
+                ctx.fillStyle = '#00e5ff';
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Check Bottom boundary
+                if (b.y >= canvas.height - 35) {
+                    let bucketIndex = Math.floor(b.x / bucketWidth);
+                    bucketIndex = Math.max(0, Math.min(bucketIndex, multipliers.length - 1));
+                    
+                    let payout = b.bet * multipliers[bucketIndex];
+                    balance += payout;
+                    updateBalanceDisplay();
+                    
+                    balls.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
+    </script>
+</body>
+</html>

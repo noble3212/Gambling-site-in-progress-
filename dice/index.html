@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dice - Arcade</title>
+    <style>
+        body {
+            background-color: #0f111a;
+            color: white;
+            font-family: sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .nav { margin-bottom: 20px; }
+        a { color: #00e5ff; text-decoration: none; }
+        .game-box {
+            background: #141622;
+            border: 1px solid #2a2e3f;
+            border-radius: 12px;
+            max-width: 450px;
+            margin: 40px auto;
+            padding: 30px;
+        }
+        .roll-display {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #00e5ff;
+        }
+        button {
+            background: #ff3e6c;
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+        button:hover { background: #e0325c; }
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .input-field {
+            background: #1a1d29;
+            border: 1px solid #2a2e3f;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            width: 45%;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav"><a href="../index.html">← Back to Lobby</a></div>
+    <h2>🎲 Dice Roll</h2>
+    <p>Balance: <span id="balance" style="color:#4caf50; font-weight:bold;">$0.00</span></p>
+
+    <div class="game-box">
+        <div class="roll-display" id="rollResult">50.00</div>
+        
+        <div class="input-group">
+            <div>
+                <label style="font-size:0.8rem; color:#8a8f98;">Bet Amount</label>
+                <input type="number" id="bet" class="input-field" style="width:90%;" value="10">
+            </div>
+            <div>
+                <label style="font-size:0.8rem; color:#8a8f98;">Roll Under Target</label>
+                <input type="number" id="target" class="input-field" style="width:90%;" value="50" min="2" max="98" oninput="updateMultiplier()">
+            </div>
+        </div>
+
+        <p style="color:#8a8f98; margin-bottom: 20px;">
+            Estimated Payout Multiplier: <span id="mult" style="color:white; font-weight:bold;">1.98x</span>
+        </p>
+
+        <button onclick="rollDice()">Roll Dice</button>
+        <p id="status" style="margin-top:15px; font-weight:bold;"></p>
+    </div>
+
+    <script>
+        let balance = parseFloat(localStorage.getItem('arcade_balance')) || 1000;
+        updateBalanceDisplay();
+        updateMultiplier();
+
+        function updateBalanceDisplay() {
+            document.getElementById('balance').innerText = `$${balance.toFixed(2)}`;
+            localStorage.setItem('arcade_balance', balance.toString());
+        }
+
+        function updateMultiplier() {
+            const target = parseFloat(document.getElementById('target').value) || 50;
+            // House edge calculation mimic (99 / target)
+            const multiplier = (99 / target).toFixed(2);
+            document.getElementById('mult').innerText = `${multiplier}x`;
+        }
+
+        function rollDice() {
+            const bet = parseFloat(document.getElementById('bet').value);
+            const target = parseFloat(document.getElementById('target').value);
+            const statusText = document.getElementById('status');
+            const rollDisplay = document.getElementById('rollResult');
+
+            if (bet > balance || bet <= 0 || target < 2 || target > 98) {
+                alert("Please correct your inputs.");
+                return;
+            }
+
+            balance -= bet;
+            
+            // Generate pseudo-random float between 0.00 and 100.00
+            const roll = (Math.random() * 100).toFixed(2);
+            rollDisplay.innerText = roll;
+
+            const multiplier = 99 / target;
+
+            if (parseFloat(roll) < target) {
+                const winAmount = bet * multiplier;
+                balance += winAmount;
+                statusText.innerText = `WIN! Payout: +$${winAmount.toFixed(2)}`;
+                statusText.style.color = "#4caf50";
+            } else {
+                statusText.innerText = `LOSE! -$${bet.toFixed(2)}`;
+                statusText.style.color = "#ff3e6c";
+            }
+
+            updateBalanceDisplay();
+        }
+    </script>
+</body>
+</html>
