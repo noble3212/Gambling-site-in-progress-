@@ -10,6 +10,8 @@ At the moment only **two games** are available while additional features and gam
 
 One known issue is that exiting certain games may return you to my github homepage instead of the game selection screen. This will be fixed in a future update.
 
+Another know issue is with plinko balls physics 
+
 ## 🎮 Features
 
 * Browser-based gameplay
