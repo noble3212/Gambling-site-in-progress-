@@ -68,13 +68,20 @@
         const balls = [];
         const multipliers = [5, 2, 0.5, 0.2, 0.2, 0.5, 2, 5];
 
-        // Generate Pegs
+        // Generate Pegs and calculate triangle outer bounds
+        let minLeftX = canvas.width;
+        let maxRightX = 0;
+
         for (let i = 2; i <= rows; i++) {
             const count = i + 1;
             const y = i * 45;
             for (let j = 0; j < count; j++) {
                 const x = (canvas.width / 2) - ((count - 1) * 18) + (j * 36);
                 pegs.push({ x, y });
+                
+                // Track outer boundaries
+                if (j === 0 && x < minLeftX) minLeftX = x;
+                if (j === count - 1 && x > maxRightX) maxRightX = x;
             }
         }
 
@@ -95,7 +102,7 @@
             updateBalanceDisplay();
 
             balls.push({
-                x: canvas.width / 2 + (Math.random() * 6 - 3),
+                x: canvas.width / 2 + (Math.random() * 4 - 2), // Slightly tightened spawn spread
                 y: 35,
                 vx: (Math.random() - 0.5) * 0.2,
                 vy: 1,
@@ -170,6 +177,34 @@
                 b.x += b.vx;
                 b.y += b.vy;
 
+                // Dynamic Diagonal Wall Containment
+                // Calculates the strict horizontal limits based on the ball's current height
+                if (b.y >= 90 && b.y <= rows * 45) {
+                    const progress = (b.y - 90) / ((rows * 45) - 90);
+                    const currentLeftLimit = 232 - (progress * (232 - minLeftX)) + b.radius;
+                    const currentRightLimit = 268 + (progress * (maxRightX - 268)) - b.radius;
+
+                    if (b.x < currentLeftLimit) {
+                        b.x = currentLeftLimit;
+                        b.vx = Math.abs(b.vx) * 0.6; // Bounce inward
+                    } else if (b.x > currentRightLimit) {
+                        b.x = currentRightLimit;
+                        b.vx = -Math.abs(b.vx) * 0.6; // Bounce inward
+                    }
+                } 
+                // Containment below the lowest peg row down to the buckets
+                else if (b.y > rows * 45) {
+                    const outerLeftWall = minLeftX + b.radius;
+                    const outerRightWall = maxRightX - b.radius;
+                    if (b.x < outerLeftWall) {
+                        b.x = outerLeftWall;
+                        b.vx = Math.abs(b.vx) * 0.6;
+                    } else if (b.x > outerRightWall) {
+                        b.x = outerRightWall;
+                        b.vx = -Math.abs(b.vx) * 0.6;
+                    }
+                }
+
                 // Peg collisions
                 if (b.pegCooldown === 0) {
                     for (const peg of pegs) {
@@ -190,17 +225,17 @@
                             const dot = b.vx * nx + b.vy * ny;
 
                             if (dot < 0) {
-                                const restitution = 0.7;
+                                const restitution = 0.5; // Slightly lowered to reduce chaotic horizontal scattering
 
                                 b.vx -= (1 + restitution) * dot * nx;
                                 b.vy -= (1 + restitution) * dot * ny;
 
-                                // Small randomness
-                                b.vx += (Math.random() - 0.5) * 0.5;
+                                // Small controlled randomness
+                                b.vx += (Math.random() - 0.5) * 0.4;
 
                                 // Anti-stuck nudge
                                 if (Math.abs(nx) < 0.15) {
-                                    b.vx += Math.random() < 0.5 ? -0.8 : 0.8;
+                                    b.vx += Math.random() < 0.5 ? -0.6 : 0.6;
                                 }
 
                                 b.pegCooldown = 2;
@@ -210,7 +245,7 @@
                     }
                 }
 
-                // Walls
+                // Outer Canvas Walls (Fallback safety net)
                 if (b.x < b.radius) {
                     b.x = b.radius;
                     b.vx *= -0.5;
