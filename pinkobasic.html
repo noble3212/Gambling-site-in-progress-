@@ -117,7 +117,7 @@
                 ctx.fillStyle = multipliers[i] >= 1 ? '#ff3e6c' : '#2a2e3f';
                 ctx.fillRect(i * bucketWidth + 2, canvas.height - 35, bucketWidth - 4, 30);
                 ctx.fillStyle = '#fff';
-                ctx.font = '12px Arial';
+                ctx.font = 'bold 12px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText(multipliers[i] + 'x', i * bucketWidth + bucketWidth / 2, canvas.height - 15);
             }
@@ -125,28 +125,56 @@
             // Update & Draw Balls
             for (let i = balls.length - 1; i >= 0; i--) {
                 let b = balls[i];
-                b.vy += 0.15; // Gravity
+                
+                // Gravity & Movement
+                b.vy += 0.2; 
                 b.x += b.vx;
                 b.y += b.vy;
+                
+                // Horizontal Friction (avoids endless sliding)
+                b.vx *= 0.99;
 
                 // Peg Collision Check
                 pegs.forEach(peg => {
-                    let dist = Math.hypot(b.x - peg.x, b.y - peg.y);
-                    if (dist < b.radius + 3) {
-                        // Push out and bounce off randomly sideways
-                        b.y = peg.y - b.radius; 
-                        b.vy = -b.vy * 0.4;
-                        b.vx = (b.x - peg.x) * 0.8 + (Math.random() * 0.4 - 0.2);
+                    let dx = b.x - peg.x;
+                    let dy = b.y - peg.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    let minDist = b.radius + 3;
+
+                    if (dist < minDist) {
+                        // Calculate angle of collision
+                        let angle = Math.atan2(dy, dx);
+                        
+                        // Push ball outside the peg radius instantly to prevent sticking
+                        b.x = peg.x + Math.cos(angle) * minDist;
+                        b.y = peg.y + Math.sin(angle) * minDist;
+
+                        // Bounce logic with slight dampening and a touch of randomness
+                        let speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+                        b.vx = Math.cos(angle) * speed * 0.6 + (Math.random() * 0.6 - 0.3);
+                        b.vy = Math.sin(angle) * speed * 0.6;
                     }
                 });
 
-                // Draw Ball
+                // Wall Boundaries
+                if (b.x < b.radius) {
+                    b.x = b.radius;
+                    b.vx *= -0.5;
+                } else if (b.x > canvas.width - b.radius) {
+                    b.x = canvas.width - b.radius;
+                    b.vx *= -0.5;
+                }
+
+                // Draw Ball with Glowing Visual Effect
                 ctx.fillStyle = '#00e5ff';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#00e5ff';
                 ctx.beginPath();
                 ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.shadowBlur = 0; // Reset shadow for next elements
 
-                // Check Bottom boundary
+                // Check Bottom Boundary (Bucket scoring)
                 if (b.y >= canvas.height - 35) {
                     let bucketIndex = Math.floor(b.x / bucketWidth);
                     bucketIndex = Math.max(0, Math.min(bucketIndex, multipliers.length - 1));
