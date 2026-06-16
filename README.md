@@ -19,6 +19,7 @@ One known issue is that exiting certain games may return you to my github homepa
 ## :white_check_mark: PROGRESS
 
 Updated issue with plinko ball physics.
+
 We now have SLOTS!!!!!
 
 Progress to come? - More games. 
