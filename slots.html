@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Slots</title>
+    <style>
+        body {
+            background-color: #0f111a;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            margin: 20px 0;
+        }
+        h1 {
+            color: #ff3e6c;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(255, 62, 108, 0.5);
+            margin-bottom: 5px;
+        }
+        .back-btn {
+            background: #1a1d29;
+            border: 1px solid #2a2e3f;
+            color: #00e5ff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+        .back-btn:hover {
+            border-color: #00e5ff;
+        }
+        .balance-card {
+            background: #1a1d29;
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 12px;
+            border: 1px solid #2a2e3f;
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+        }
+        .balance-amount {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        /* Slot Machine UI */
+        .slot-machine {
+            background: #161925;
+            border: 4px solid #ff3e6c;
+            border-radius: 24px;
+            box-shadow: 0 0 25px rgba(255, 62, 108, 0.2);
+            max-width: 450px;
+            margin: 0 auto 30px auto;
+            padding: 25px;
+        }
+        .reels-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            background: #090a0f;
+            padding: 20px;
+            border-radius: 16px;
+            border: 2px solid #2a2e3f;
+            overflow: hidden;
+        }
+        .reel {
+            background: #1a1d29;
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            border: 1px solid #3d435c;
+            font-size: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: transform 0.1s ease-out;
+        }
+        
+        /* CSS Animations for Spinning Effect */
+        .spinning {
+            animation: blurSpin 0.15s infinite linear;
+        }
+        @keyframes blurSpin {
+            0% { filter: blur(3px); transform: scaleY(1.1); }
+            50% { filter: blur(5px); transform: scaleY(0.9); }
+            100% { filter: blur(3px); transform: scaleY(1.1); }
+        }
+
+        /* Betting Controls */
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .bet-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .control-btn {
+            background: #2a2e3f;
+            border: none;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .control-btn:hover {
+            background: #3d435c;
+        }
+        input[type="number"] {
+            background: #090a0f;
+            border: 1px solid #2a2e3f;
+            color: #fff;
+            padding: 8px;
+            border-radius: 6px;
+            width: 80px;
+            text-align: center;
+            font-size: 1rem;
+        }
+        .spin-btn {
+            background: #4caf50;
+            border: none;
+            color: white;
+            padding: 12px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            transition: transform 0.1s, background-color 0.2s;
+            width: 80%;
+        }
+        .spin-btn:hover {
+            background: #66bb6a;
+        }
+        .spin-btn:active {
+            transform: scale(0.98);
+        }
+        .spin-btn:disabled {
+            background: #2a2e3f;
+            color: #8a8f98;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Feedback Message */
+        .message-box {
+            height: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .win-text { color: #00e5ff; text-shadow: 0 0 8px rgba(0, 229, 255, 0.4); }
+        .lose-text { color: #8a8f98; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">← Back to Lobby</a>
+
+    <div class="header">
+        <h1>🎰 Neon Slots 🎰</h1>
+        <p>Match symbols to score massive multipliers!</p>
+    </div>
+
+    <div class="balance-card">
+        Wallet Balance: <span class="balance-amount" id="balance">$0.00</span>
+    </div>
+
+    <div class="slot-machine">
+        <div class="reels-container">
+            <div class="reel" id="reel1">🍒</div>
+            <div class="reel" id="reel2">🔔</div>
+            <div class="reel" id="reel3">💎</div>
+        </div>
+
+        <div class="message-box" id="message">Place your bet and spin!</div>
+
+        <div class="controls">
+            <div class="bet-inputs">
+                <button class="control-btn" onclick="adjustBet(-10)">-10</button>
+                <button class="control-btn" onclick="adjustBet(-1)">-1</button>
+                <input type="number" id="bet-amount" value="10" min="1" step="1">
+                <button class="control-btn" onclick="adjustBet(1)">+1</button>
+                <button class="control-btn" onclick="adjustBet(10)">+10</button>
+                <button class="control-btn" style="color: #ff3e6c;" onclick="maxBet()">MAX</button>
+            </div>
+            <button class="spin-btn" id="spin-button" onclick="spin()">SPIN</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Configuration
+        const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '7️⃣'];
+        
+        // Dynamic Payout Table Multipliers
+        const PAYOUTS = {
+            '🍒': 3, '🍋': 4, '🍊': 5, '🍇': 6, '🔔': 10, '💎': 15, '7️⃣': 50
+        };
+
+        // Initialize state variables
+        let balance = parseFloat(localStorage.getItem('arcade_balance')) || 1000.00;
+        const balanceEl = document.getElementById('balance');
+        const betInput = document.getElementById('bet-amount');
+        const spinBtn = document.getElementById('spin-button');
+        const messageEl = document.getElementById('message');
+        
+        const reels = [
+            document.getElementById('reel1'),
+            document.getElementById('reel2'),
+            document.getElementById('reel3')
+        ];
+
+        // Format and update lobby-ready balance
+        function updateBalanceDisplay() {
+            balanceEl.innerText = `$${balance.toFixed(2)}`;
+            localStorage.setItem('arcade_balance', balance.toString());
+        }
+        updateBalanceDisplay();
+
+        // Bet Adjustment Functions
+        function adjustBet(amount) {
+            let currentBet = parseInt(betInput.value) || 0;
+            currentBet = Math.max(1, currentBet + amount);
+            betInput.value = currentBet;
+        }
+
+        function maxBet() {
+            betInput.value = Math.floor(balance);
+        }
+
+        // Main Spin Logic
+        function spin() {
+            const bet = parseInt(betInput.value);
+
+            // Input Validation
+            if (isNaN(bet) || bet <= 0) {
+                messageEl.className = 'lose-text';
+                messageEl.innerText = "⚠️ Invalid bet amount!";
+                return;
+            }
+            if (bet > balance) {
+                messageEl.className = 'lose-text';
+                messageEl.innerText = "❌ Insufficient funds!";
+                return;
+            }
+
+            // Deduct Bet
+            balance -= bet;
+            updateBalanceDisplay();
+            
+            // Lock Controls during spin
+            spinBtn.disabled = true;
+            betInput.disabled = true;
+            messageEl.innerText = "Spinning...";
+            messageEl.className = '';
+
+            // Add CSS class to start the blur/spin simulation
+            reels.forEach(reel => reel.classList.add('spinning'));
+
+            // Cycle symbols quickly for visual flash effect during spin
+            let flashInterval = setInterval(() => {
+                reels.forEach(reel => {
+                    reel.innerText = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+                });
+            }, 70);
+
+            // Resolve the spin step-by-step
+            setTimeout(() => {
+                clearInterval(flashInterval);
+                
+                // Roll final random results
+                const finalResults = [
+                    SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+                    SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+                    SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]
+                ];
+
+                // Stop animations and display true outcomes
+                reels.forEach((reel, index) => {
+                    reel.classList.remove('spinning');
+                    reel.innerText = finalResults[index];
+                });
+
+                // Calculate Payout
+                let winAmount = 0;
+                let msg = "";
+
+                if (finalResults[0] === finalResults[1] && finalResults[1] === finalResults[2]) {
+                    // 3 of a kind (Jackpot)
+                    const symbol = finalResults[0];
+                    const multiplier = PAYOUTS[symbol];
+                    winAmount = bet * multiplier;
+                    msg = `🎉 JACKPOT! 3x [${symbol}] pays ${multiplier}x! (+$${winAmount.toFixed(2)})`;
+                    messageEl.className = 'win-text';
+                } else if (finalResults[0] === finalResults[1] || finalResults[1] === finalResults[2] || finalResults[0] === finalResults[2]) {
+                    // 2 of a kind (Small win)
+                    winAmount = bet * 1.5;
+                    msg = `✨ Double! Matching pair pays 1.5x! (+$${winAmount.toFixed(2)})`;
+                    messageEl.className = 'win-text';
+                } else {
+                    // No match
+                    msg = "Better luck next time!";
+                    messageEl.className = 'lose-text';
+                }
+
+                // Credit winnings and release locks
+                balance += winAmount;
+                updateBalanceDisplay();
+                messageEl.innerText = msg;
+                spinBtn.disabled = false;
+                betInput.disabled = false;
+
+            }, 1200); // Spins for 1.2 seconds
+        }
+    </script>
+</body>
+</html>
