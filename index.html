@@ -39,14 +39,14 @@
             justify-content: center;
             gap: 30px;
             flex-wrap: wrap;
-            max-width: 950px; /* Marginally widened to perfectly fit 3 cards side-by-side */
-            margin: 0 auto;
+            max-width: 1200px; /* Marginally widened to perfectly fit 4 cards side-by-side */
+            margin: 0 auto 50px auto;
         }
         .card {
             background: #1a1d29;
             border: 1px solid #2a2e3f;
             border-radius: 16px;
-            width: 260px;
+            width: 230px;
             padding: 20px;
             text-decoration: none;
             color: white;
@@ -64,6 +64,110 @@
         .card p {
             color: #8a8f98;
             font-size: 0.9rem;
+        }
+
+        /* --- Blackjack Game Section Styles --- */
+        .game-container {
+            background: #1a1d29;
+            border: 2px solid #2a2e3f;
+            border-radius: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .game-container h2 {
+            color: #00e5ff;
+            margin-top: 0;
+        }
+        .bet-controls {
+            margin: 15px 0;
+        }
+        .game-btn {
+            background: #ff3e6c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.2s;
+        }
+        .game-btn:hover {
+            background: #ff1a4a;
+        }
+        .game-btn:disabled {
+            background: #2a2e3f;
+            color: #8a8f98;
+            cursor: not-allowed;
+        }
+        .bet-input {
+            background: #0f111a;
+            border: 1px solid #2a2e3f;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            width: 80px;
+            text-align: center;
+            font-size: 1rem;
+        }
+        .play-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .hand-section {
+            background: #0f111a;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #2a2e3f;
+        }
+        .hand-title {
+            font-size: 0.9rem;
+            color: #8a8f98;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .card-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            min-height: 90px;
+            flex-wrap: wrap;
+        }
+        .playing-card {
+            background: white;
+            color: black;
+            border-radius: 6px;
+            width: 60px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-sizing: border-box;
+        }
+        .playing-card.red {
+            color: #ff3e6c;
+        }
+        .playing-card.hidden {
+            background: linear-gradient(135deg, #ff3e6c 25%, #1a1d29 25%, #1a1d29 50%, #ff3e6c 50%, #ff3e6c 75%, #1a1d29 75%, #1a1d29 100%);
+            background-size: 20px 20px;
+            color: transparent;
+        }
+        .status-msg {
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 30px;
+            margin: 15px 0;
+            color: #00e5ff;
         }
     </style>
 </head>
@@ -93,18 +197,243 @@
             <h2>🎰 Slots</h2>
             <p>Spin the neon reels and track down matching items for huge multi-payouts!</p>
         </a>
+
+        <a href="#blackjack-game" class="card">
+            <h2>🃏 Blackjack</h2>
+            <p>Go head-to-head against the dealer. Get as close to 21 as possible without busting!</p>
+        </a>
+    </div>
+
+    <div id="blackjack-game" class="game-container">
+        <h2>🃏 Blackjack Arena</h2>
+        <div class="bet-controls">
+            <label for="bet-amount">Bet Amount: </label>
+            <input type="number" id="bet-amount" class="bet-input" value="10" min="1">
+            <button class="game-btn" id="deal-btn" onclick="startNewGame()">Deal Hand</button>
+        </div>
+
+        <div class="play-area">
+            <div class="hand-section">
+                <div class="hand-title">Dealer's Hand <span id="dealer-score"></span></div>
+                <div class="card-display" id="dealer-cards"></div>
+            </div>
+
+            <div class="hand-section">
+                <div class="hand-title">Your Hand <span id="player-score"></span></div>
+                <div class="card-display" id="player-cards"></div>
+            </div>
+        </div>
+
+        <div class="status-msg" id="status-message">Place a bet and deal to start!</div>
+
+        <div class="action-controls">
+            <button class="game-btn" id="hit-btn" onclick="playerHit()" disabled>Hit</button>
+            <button class="game-btn" id="stand-btn" onclick="playerStand()" disabled>Stand</button>
+        </div>
     </div>
 
     <script>
-        // Initialize balance if it doesn't exist
+        // Balance Management
         if (!localStorage.getItem('arcade_balance')) {
             localStorage.setItem('arcade_balance', '1000.00');
         }
         
-        // Display balance
-        const currentBalance = parseFloat(localStorage.getItem('arcade_balance')).toFixed(2);
-        document.getElementById('balance').innerText = `$${currentBalance}`;
+        function updateBalanceDisplay() {
+            const currentBalance = parseFloat(localStorage.getItem('arcade_balance')).toFixed(2);
+            document.getElementById('balance').innerText = `$${currentBalance}`;
+        }
+
+        function getBalance() {
+            return parseFloat(localStorage.getItem('arcade_balance'));
+        }
+
+        function setBalance(amount) {
+            localStorage.setItem('arcade_balance', amount.toFixed(2));
+            updateBalanceDisplay();
+        }
+
+        // --- Blackjack Game Engine Logic ---
+        let deck = [];
+        let playerHand = [];
+        let dealerHand = [];
+        let currentBet = 0;
+        let gameActive = false;
+
+        const suits = ['♠', '♥', '♦', '♣'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+
+        function buildDeck() {
+            deck = [];
+            for (let suit of suits) {
+                for (let value of values) {
+                    deck.push({ suit, value });
+                }
+            }
+        }
+
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function getCardValue(card) {
+            if (['J', 'Q', 'K'].includes(card.value)) return 10;
+            if (card.value === 'A') return 11;
+            return parseInt(card.value);
+        }
+
+        function calculateHand(hand) {
+            let score = 0;
+            let aces = 0;
+            for (let card of hand) {
+                score += getCardValue(card);
+                if (card.value === 'A') aces++;
+            }
+            while (score > 21 && aces > 0) {
+                score -= 10;
+                aces--;
+            }
+            return score;
+        }
+
+        function renderCardHTML(card, isHidden = false) {
+            if (isHidden) {
+                return `<div class="playing-card hidden"></div>`;
+            }
+            const isRed = ['♥', '♦'].includes(card.suit);
+            return `<div class="playing-card ${isRed ? 'red' : ''}">
+                <div>${card.value}</div>
+                <div style="align-self: center; font-size: 1.5rem;">${card.suit}</div>
+                <div style="align-self: flex-end; transform: rotate(180deg);">${card.value}</div>
+            </div>`;
+        }
+
+        function updateUI(hideDealerCard = true) {
+            const playerCardContainer = document.getElementById('player-cards');
+            const dealerCardContainer = document.getElementById('dealer-cards');
+            
+            playerCardContainer.innerHTML = playerHand.map(c => renderCardHTML(c)).join('');
+            
+            if (hideDealerCard && dealerHand.length > 0) {
+                dealerCardContainer.innerHTML = renderCardHTML(dealerHand[0]) + renderCardHTML(null, true);
+                document.getElementById('dealer-score').innerText = `(${getCardValue(dealerHand[0])})`;
+            } else {
+                dealerCardContainer.innerHTML = dealerHand.map(c => renderCardHTML(c)).join('');
+                document.getElementById('dealer-score').innerText = `(${calculateHand(dealerHand)})`;
+            }
+            
+            document.getElementById('player-score').innerText = `(${calculateHand(playerHand)})`;
+        }
+
+        function startNewGame() {
+            const betInput = document.getElementById('bet-amount');
+            currentBet = parseInt(betInput.value);
+            const userBalance = getBalance();
+
+            if (isNaN(currentBet) || currentBet <= 0) {
+                alert("Please enter a valid bet amount.");
+                return;
+            }
+            if (currentBet > userBalance) {
+                alert("Insufficient balance for this bet!");
+                return;
+            }
+
+            // Deduct Bet
+            setBalance(userBalance - currentBet);
+
+            // Initialize Deck and Hands
+            buildDeck();
+            shuffleDeck();
+            playerHand = [deck.pop(), deck.pop()];
+            dealerHand = [deck.pop(), deck.pop()];
+            gameActive = true;
+
+            document.getElementById('status-message').innerText = "Hit or Stand?";
+            document.getElementById('deal-btn').disabled = true;
+            document.getElementById('hit-btn').disabled = false;
+            document.getElementById('stand-btn').disabled = false;
+
+            updateUI(true);
+
+            // Instant Natural Blackjack Check
+            if (calculateHand(playerHand) === 21) {
+                endGame('blackjack');
+            }
+        }
+
+        function playerHit() {
+            if (!gameActive) return;
+            playerHand.push(deck.pop());
+            updateUI(true);
+
+            if (calculateHand(playerHand) > 21) {
+                endGame('bust');
+            }
+        }
+
+        function playerStand() {
+            if (!gameActive) return;
+            gameActive = false;
+
+            // Dealer AI turns
+            while (calculateHand(dealerHand) < 17) {
+                dealerHand.push(deck.pop());
+            }
+
+            updateUI(false);
+
+            const pScore = calculateHand(playerHand);
+            const dScore = calculateHand(dealerHand);
+
+            if (dScore > 21) {
+                endGame('dealer-bust');
+            } else if (pScore > dScore) {
+                endGame('win');
+            } else if (pScore < dScore) {
+                endGame('lose');
+            } else {
+                endGame('push');
+            }
+        }
+
+        function endGame(outcome) {
+            gameActive = false;
+            let msg = "";
+            let balance = getBalance();
+
+            if (outcome === 'blackjack') {
+                msg = "💥 Blackjack! You Win!";
+                balance += currentBet * 2.5; // Pays 3:2
+                updateUI(false);
+            } else if (outcome === 'bust') {
+                msg = "🛑 Busted! You lost.";
+                updateUI(true);
+            } else if (outcome === 'dealer-bust') {
+                msg = "🥳 Dealer busted! You Win!";
+                balance += currentBet * 2;
+            } else if (outcome === 'win') {
+                msg = "🏆 You beat the Dealer!";
+                balance += currentBet * 2;
+            } else if (outcome === 'lose') {
+                msg = "📉 Dealer Wins.";
+            } else if (outcome === 'push') {
+                msg = "🤝 Push! Your bet was returned.";
+                balance += currentBet;
+            }
+
+            setBalance(balance);
+            document.getElementById('status-message').innerText = msg;
+            
+            document.getElementById('deal-btn').disabled = false;
+            document.getElementById('hit-btn').disabled = true;
+            document.getElementById('stand-btn').disabled = true;
+        }
+
+        // Initialize display setup
+        updateBalanceDisplay();
     </script>
 </body>
-</html> 
-#randomcommentforgithubservercache
+</html>
