@@ -16,7 +16,10 @@ Another know issue is with plinko balls physics
 
 One known issue is that exiting certain games may return you to my github homepage instead of the game selection screen. This will be fixed in a future update.
 
-Another know issue is with plinko balls physics 
+## :white_check_mark: PROGRESS
+
+Updated issue with plinko ball physics.
+Progress to come? - More games. 
 
 ## 🎮 Features
 
