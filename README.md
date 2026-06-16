@@ -6,11 +6,7 @@ A browser-based gaming project built with HTML, CSS, and JavaScript and hosted o
 
 This project is actively being developed.
 
-At the moment only **two games** are available while additional features and games are being worked on.
-
-One known issue is that exiting certain games may return you to my github homepage instead of the game selection screen. This will be fixed in a future update.
-
-Another know issue is with plinko balls physics 
+At the moment only **four games** are available while additional features and games are being worked on.
 
 ## :warning: Issues
 
