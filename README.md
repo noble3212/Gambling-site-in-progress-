@@ -22,6 +22,8 @@ Updated issue with plinko ball physics.
 
 We now have SLOTS!!!!!
 
+We now have BLACKJACK!!!!
+
 Progress to come? - More games. 
 
 ## 🎮 Features
