@@ -16,7 +16,7 @@ One UPDATE it seems if you use page back on your mouse it wil return you to the 
 
 One issue seems black jack might be a little unfair but it's playable. 
 
-Another issue probably is slot logic on the new slot machine seems a little more in favor of the house. Will fix.
+Another issue probably is slot logic on the new slot machine seems a little more in favor of the house. Will fix. Also forgot to add a return to home button will fix in the future sorry guys
 
 ## :white_check_mark: PROGRESS
 
