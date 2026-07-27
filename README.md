@@ -14,11 +14,15 @@ One known issue is that exiting certain games may return you to my github homepa
 
 One UPDATE it seems if you use page back on your mouse it wil return you to the game home!!
 
+One issue seems black jack might be a little unfair but it's playable. 
+
+Another issue probably is slot logic on the new slot machine seems a little more in favor of the house. Will fix.
+
 ## :white_check_mark: PROGRESS
 
 Updated issue with plinko ball physics.
 
-We now have SLOTS!!!!!
+We now have **UPDATED** SLOTS!!!!!
 
 We now have BLACKJACK!!!!
 
