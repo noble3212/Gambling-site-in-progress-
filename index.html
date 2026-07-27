@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Arcade Lobby</title>
+
     <style>
         body {
             background-color: #0f111a;
@@ -13,14 +14,17 @@
             margin: 0;
             padding: 20px;
         }
+
         .header {
             margin: 40px 0;
         }
+
         h1 {
             color: #ff3e6c;
             font-size: 3rem;
             text-shadow: 0 0 10px rgba(255, 62, 108, 0.5);
         }
+
         .balance-card {
             background: #1a1d29;
             display: inline-block;
@@ -30,18 +34,21 @@
             font-size: 1.5rem;
             margin-bottom: 40px;
         }
+
         .balance-amount {
             color: #4caf50;
             font-weight: bold;
         }
+
         .grid {
             display: flex;
             justify-content: center;
             gap: 20px;
             flex-wrap: wrap;
-            max-width: 1200px; /* Widened to perfectly fit all 4 cards side-by-side on desktop */
+            max-width: 1450px;
             margin: 0 auto;
         }
+
         .card {
             background: #1a1d29;
             border: 1px solid #2a2e3f;
@@ -50,23 +57,45 @@
             padding: 20px;
             text-decoration: none;
             color: white;
-            transition: transform 0.2s, border-color 0.2s;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
             cursor: pointer;
+            box-sizing: border-box;
         }
+
         .card:hover {
             transform: translateY(-5px);
             border-color: #ff3e6c;
+            box-shadow: 0 0 20px rgba(255, 62, 108, 0.3);
         }
+
         .card h2 {
             margin-top: 0;
             color: #00e5ff;
         }
+
         .card p {
             color: #8a8f98;
             font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .card {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .balance-card {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="header">
@@ -75,15 +104,17 @@
     </div>
 
     <div class="balance-card">
-        Wallet Balance: <span class="balance-amount" id="balance">$0.00</span>
+        Wallet Balance:
+        <span class="balance-amount" id="balance">$0.00</span>
     </div>
 
     <div class="grid">
+
         <a href="pinkobasic.html" class="card">
             <h2>🔵 Plinko</h2>
             <p>Drop the ball down the peg grid and hit high multipliers!</p>
         </a>
-        
+
         <a href="dice.html" class="card">
             <h2>🎲 Dice</h2>
             <p>Predict whether the roll will be over or under your target.</p>
@@ -91,25 +122,38 @@
 
         <a href="slots.html" class="card">
             <h2>🎰 Slots</h2>
-            <p>Spin the neon reels and track down matching items for huge multi-payouts!</p>
+            <p>Spin the neon reels and line up matching symbols for huge payouts!</p>
         </a>
 
         <a href="blackjack.html" class="card">
             <h2>🃏 Blackjack</h2>
             <p>Go head-to-head against the dealer and get as close to 21 as possible!</p>
         </a>
+
+        <a href="roulette.html" class="card">
+            <h2>🎡 Roulette</h2>
+            <p>Place bets on red, black, even, odd, or a lucky number and watch the wheel spin!</p>
+        </a>
+
     </div>
 
     <script>
-        // Initialize balance if it doesn't exist
-        if (!localStorage.getItem('arcade_balance')) {
-            localStorage.setItem('arcade_balance', '1000.00');
+        // Initialize wallet if it doesn't exist
+        if (!localStorage.getItem("arcade_balance")) {
+            localStorage.setItem("arcade_balance", "1000.00");
         }
-        
-        // Display balance
-        const currentBalance = parseFloat(localStorage.getItem('arcade_balance')).toFixed(2);
-        document.getElementById('balance').innerText = `$${currentBalance}`;
+
+        // Display current balance
+        function updateBalance() {
+            const balance = parseFloat(localStorage.getItem("arcade_balance") || "0");
+            document.getElementById("balance").textContent = "$" + balance.toFixed(2);
+        }
+
+        updateBalance();
+
+        // Refresh the displayed balance whenever the page regains focus
+        window.addEventListener("focus", updateBalance);
     </script>
+
 </body>
-</html> 
-#randomcommentforgithubservercache
+</html>
