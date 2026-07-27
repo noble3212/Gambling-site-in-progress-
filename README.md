@@ -22,6 +22,8 @@ We now have SLOTS!!!!!
 
 We now have BLACKJACK!!!!
 
+We now have roulette!!
+
 Progress to come? - More games. 
 
 ## 🎮 Features
