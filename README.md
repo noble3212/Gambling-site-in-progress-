@@ -1,4 +1,4 @@
-# 🎰 Gambling Site In Progress
+# 🎰 Gambling Site In Progress Please note there is also vegas gambling as well on my github!
 
 A browser-based gaming project built with HTML, CSS, and JavaScript and hosted on GitHub Pages.
 
